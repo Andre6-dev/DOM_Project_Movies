@@ -11,6 +11,8 @@ const confirmAddMovieButton = cancelAddMovieButton.nextElementSibling;
 // Selecting all the modal's input.
 const userInputs = addMovieModal.querySelectorAll('input')
 
+const movies = []
+
 console.log(addMovieModal)
 console.log(startaAddMovieButton)
 console.log(userInputs)
@@ -25,6 +27,19 @@ const toggleMovieModal = () => {
     addMovieModal.classList.toggle('visible')
     toggleBackdrop()
 }
+
+const clearMovieInput = () => {
+    // Traverse userinputs and set with an empty string.
+    for (const usrInput of userInputs) {
+        usrInput.value = '';
+    }
+}
+
+const cancelAddMovie = () => {
+    toggleMovieModal()
+    clearMovieInput()
+};
+
 // The symbol "+" allow us to convert the string ratingValue in a number.
 const addMovieHandler = () => {
     const titleValue = userInputs[0].value;
@@ -38,11 +53,20 @@ const addMovieHandler = () => {
     ) {
         alert('Please enter valid values (rating between 1 and 5).')
     }
+
+    const newMovie = {
+        title: titleValue,
+        image: imageUrlValue,
+        rating: ratingValue
+    }
+
+    movies.push(newMovie)
+    console.log(movies)
+    toggleMovieModal()
+    clearMovieInput()
 };
 
-const cancelAddMovie = () => {
-    toggleMovieModal()
-};
+
 
 const backdropClickHandler = () => {
     toggleMovieModal()
