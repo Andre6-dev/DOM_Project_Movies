@@ -12,12 +12,17 @@ const confirmAddMovieButton = cancelAddMovieButton.nextElementSibling;
 const userInputs = addMovieModal.querySelectorAll('input')
 
 const entryTextSection = document.getElementById('entry-text')
+const deleteMovieModal = document.getElementById('delete-modal')
 
 const movies = []
 
 console.log(addMovieModal)
 console.log(startaAddMovieButton)
 console.log(userInputs)
+
+const toggleBackdrop = () => {
+    backdrop.classList.toggle('visible')
+};
 
 const updateUI = () => {
     if (movies.length === 0) {
@@ -27,7 +32,12 @@ const updateUI = () => {
     }
 };
 
-const deleteMovieHandler = (movieId) => {
+const closeMovieDeletionModal = () => {
+    toggleBackdrop();
+    deleteMovieModal.classList.remove('visible')
+};
+
+const deleteMovieHandler = movieId => {
     let movieIndex = 0;
     for (const movie of movies) {
         if (movie.id === movieId) {
@@ -38,6 +48,30 @@ const deleteMovieHandler = (movieId) => {
     movies.splice(movieIndex, 1);
     const listRoot = document.getElementById('movie-list')
     listRoot.children[movieIndex].remove();
+    closeMovieDeletionModal()
+    updateUI()
+};
+
+const startDeleteMovieHandler = (movieId) => {
+    deleteMovieModal.classList.add('visible');
+    toggleBackdrop();
+
+    const cancelDeletionButton = deleteMovieModal.querySelector('.btn--passive');
+    let confirmDeletionButton = deleteMovieModal.querySelector('.btn--danger');
+
+    // Creamos un clon del boton de confirmacion para que no se tenga varios EventListeners y se puedan borrar.
+    confirmDeletionButton.replaceWith(confirmDeletionButton.cloneNode(true))
+
+    confirmDeletionButton = deleteMovieModal.querySelector('.btn--danger');
+
+    // confirmDeletionButton.removeEventListener('click', deleteMovieHandler.bind(null, movieId))
+    cancelDeletionButton.removeEventListener('click', closeMovieDeletionModal)
+
+    cancelDeletionButton.addEventListener('click', closeMovieDeletionModal);
+    confirmDeletionButton.addEventListener(
+        'click',
+        deleteMovieHandler.bind(null, movieId)
+    )
 };
 
 const renderNewMovieElement = (id, title, imageUrl, rating) => {
@@ -51,19 +85,21 @@ const renderNewMovieElement = (id, title, imageUrl, rating) => {
             <h2>${title}</h2>
             <p>${rating}/5 stars</p>
         </div>`
-    newMovieElement.addEventListener('click', deleteMovieHandler.bind(null, id))
+    newMovieElement.addEventListener(
+        'click',
+        startDeleteMovieHandler.bind(null, id))
     const listRoot = document.getElementById('movie-list')
     listRoot.append(newMovieElement)
 };
 
 
-const toggleBackdrop = () => {
-    backdrop.classList.toggle('visible')
+const closeMovieModal = () => {
+    addMovieModal.classList.remove('visible')
 };
 
 //Change the class to the modal to toggle visibility
-const toggleMovieModal = () => {
-    addMovieModal.classList.toggle('visible')
+const showMovieModal = () => {
+    addMovieModal.classList.add('visible')
     toggleBackdrop()
 }
 
@@ -74,8 +110,9 @@ const clearMovieInput = () => {
     }
 }
 
-const cancelAddMovie = () => {
-    toggleMovieModal()
+const cancelAddMovieHandler = () => {
+    closeMovieModal()
+    toggleBackdrop()
     clearMovieInput()
 };
 
@@ -102,7 +139,8 @@ const addMovieHandler = () => {
 
     movies.push(newMovie)
     console.log(movies)
-    toggleMovieModal()
+    closeMovieModal()
+    toggleBackdrop()
     clearMovieInput()
     renderNewMovieElement(newMovie.id, newMovie.title, newMovie.image, newMovie.rating)
     updateUI()
@@ -111,11 +149,13 @@ const addMovieHandler = () => {
 
 
 const backdropClickHandler = () => {
-    toggleMovieModal()
+    closeMovieModal()
+    closeMovieDeletionModal()
+    clearMovieInput()
 }
 
 // We don't to add parenthesis because we don't want to execute it immediately
-startaAddMovieButton.addEventListener('click', toggleMovieModal);
+startaAddMovieButton.addEventListener('click', showMovieModal);
 backdrop.addEventListener('click', backdropClickHandler);
-cancelAddMovieButton.addEventListener('click', cancelAddMovie);
+cancelAddMovieButton.addEventListener('click', cancelAddMovieHandler);
 confirmAddMovieButton.addEventListener('click', addMovieHandler)
